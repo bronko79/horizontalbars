@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lightweight-Charts – Horizontal Bars Examples</title>
+  <script src="https://unpkg.com/lightweight-charts@5/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#f8f9fb;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 16px; font-size: 22px; }
+    h2 { margin: 24px 0 8px; font-size: 18px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); padding: 16px; }
+    .chart { width: 100%; height: 360px; }
+    .note { color:#555; font-size:12px; margin-top:8px; }
+  </style>
+  
+  <script src="./horizontalbars.js?85"></script>
+</head>
+<body>
+  <h1>Lightweight-Charts – Horizontal Bars (Custom Series)</h1>
+  <div class="grid">
+    <div class="card">
+      <h2>1) Simple Bars</h2>
+      <div id="chart-simple" class="chart"></div>
+      <div class="note">Each entry has exactly <code>1</code> segment in <code>values</code>.</div>
+    </div>
+
+    <div class="card">
+      <h2>2) Stacked Bars</h2>
+      <div id="chart-stacked" class="chart"></div>
+      <div class="note">Each entry has multiple segments; <code>offset</code> is cumulative (stacked horizontally).</div>
+    </div>
+
+    <div class="card">
+      <h2>3) Multiple Bars for Each Price</h2>
+      <div id="chart-multi" class="chart"></div>
+      <div class="note">Several entries share the same <code>price</code>, so they appear under each other.</div>
+    </div>
+  </div>
+
+  <script>
+
+    // =========================
+    // Helper: create chart
+    // =========================
+    function makeChart(el, leftScaleVisible = false, rightScaleVisible = true) {
+      return LightweightCharts.createChart(el, {
+        width: el.clientWidth,
+        height: el.clientHeight,
+		leftPriceScale: { visible: leftScaleVisible },
+        rightPriceScale: { visible: rightScaleVisible, borderVisible: false, scaleMargins: { top: 0.15, bottom: 0.15 } },
+        timeScale: { visible: false },
+        layout: { background: { color: '#ffffff' } },
+        grid: { horzLines: { visible: false }, vertLines: { visible: false } },
+      });
+    }
+
+    // =========================
+    // 1) Simple Bars
+    // =========================
+    const chartSimple = makeChart(document.getElementById('chart-simple'));
+    const seriesSimple = chartSimple.addCustomSeries(
+      new HorizontalBarsSeries(),
+      {
+        align: 'right',
+        maxWidth: 0.35, // max horizontal-bars-width in percent of the total chart-width
+        barsPricePoints: 1, // define vertical room for entries
+      }
+    );
+    seriesSimple.setData([
+      // NOTE: "time" is not really needed by our renderer.
+      // It only exists here because the Lightweight-Charts API requires a time field.
+		{	
+			time: 1,
+			values: [
+				{ 
+					price: 30, 
+					items: [ 
+						{size: 50, offset: 0, color: 'rgba(239,83,80,1)'} 
+					] 
+				},
+				{
+					price: 34, 
+					items: [ 
+						{size: 20, offset: 0, color: 'rgba(38,166,154,1)'} 
+					]
+				},
+				{
+					price: 41, 
+					items: [ 
+						{size: 30, offset: 0, color: 'rgba(156,39,176,1)'} 
+					]
+				}
+			] 
+		}
+    ]);
+    chartSimple.timeScale().fitContent();
+
+
+
+    // =========================
+    // 2) Stacked Bars (cumulative offsets)
+    // =========================
+    const chartStacked = makeChart(document.getElementById('chart-stacked'), true, false);
+    const seriesStacked = chartStacked.addCustomSeries(
+      new HorizontalBarsSeries(),
+      { 	  
+        align: 'left',
+		priceScaleId: 'left',
+        maxWidth: 0.25, // max horizontal-bars-width in percent of the total chart-width
+        barsPricePoints: 1, // define vertical room for entries
+      }
+    );
+    seriesStacked.setData([
+      // NOTE: "time" is not really needed by our renderer.
+      // It only exists here because the Lightweight-Charts API requires a time field.
+		{	
+			time: 1,
+			values: [
+				{ 
+					price: 30, 
+					items: [ 
+						{ size: 50, offset: 0, color: 'rgba(239,83,80,1)' },
+						{ size: 30, offset: 50, color: 'rgba(156,39,176,1)' },
+						{ size: 20, offset: 80, color: 'rgba(38,166,154,1)' }
+					] 
+				},
+				{
+					price: 34, 
+					items: [ 
+						{ size: 20, offset: 0, color: 'rgba(239,83,80,1)' },
+						{ size: 17, offset: 20, color: 'rgba(156,39,176,1)' },
+						{ size: 50, offset: 37, color: 'rgba(38,166,154,1)' }
+					]
+				},
+				{
+					price: 41, 
+					items: [ 
+						{ size: 30, offset: 0, color: 'rgba(239,83,80,1)' },
+						{ size: 42, offset: 30, color: 'rgba(156,39,176,1)' },
+						{ size: 20, offset: 52, color: 'rgba(38,166,154,1)' }
+					]
+				}
+			] 
+		}
+    ]);
+    chartStacked.timeScale().fitContent();
+
+
+    // =========================
+    // 3) Multiple bars for each price
+    // =========================
+    const chartMulti = makeChart(document.getElementById('chart-multi'));
+    const seriesMulti = chartMulti.addCustomSeries(
+      new HorizontalBarsSeries(),
+      {
+        align: 'right',
+        maxWidth: 0.4,
+        barsPricePoints: 1, // define vertical room for multiple entries
+      }
+    );
+    seriesMulti.setData([
+      // NOTE: "time" is not really needed by our renderer.
+      // It only exists here because the Lightweight-Charts API requires a time field.	
+		{	
+			time: 1,
+			values: [
+				{ 
+					price: 35, 
+					items: [ 
+						{ size: 20, offset: 0, color: 'rgba(239,83,80,1)' }
+					] 
+				},
+				{ 
+					price: 40, 
+					items: [ 
+						{ size: 37, offset: 0, color: 'rgba(239,83,80,1)' }
+					] 
+				},
+				{ 
+					price: 41, 
+					items: [ 
+						{ size: 27, offset: 0, color: 'rgba(239,83,80,1)' }
+					] 
+				}				
+			] 
+		},
+		{	
+			time: 1,
+			values: [
+				{
+					price: 35, 
+					items: [ 
+						{ size: 20, offset: 0, color: 'rgba(156,39,176,1)' },
+						{ size: 10, offset: 20, color: 'rgba(38,166,154,1)' }
+					]
+				},
+				{ 
+					price: 40, 
+					items: [ 
+						{ size: 52, offset: 0, color: 'rgba(156,39,176,1)' },
+						{ size: 10, offset: 52, color: 'rgba(38,166,154,1)' }
+					] 
+				},
+				{ 
+					price: 41, 
+					items: [ 
+						{ size: 42, offset: 0, color: 'rgba(156,39,176,1)' },
+						{ size: 15, offset: 42, color: 'rgba(38,166,154,1)' }
+					] 
+				}		
+			] 
+		}		
+		
+    ]);
+    chartMulti.timeScale().fitContent();
+
+
+
+    // =========================
+    // Responsive resize
+    // =========================
+    window.addEventListener('resize', () => {
+      for (const el of document.querySelectorAll('.chart')) {
+        const api = (el.id === 'chart-simple') ? chartSimple
+                  : (el.id === 'chart-stacked') ? chartStacked
+                  : chartMulti;
+        api.applyOptions({ width: el.clientWidth, height: el.clientHeight });
+      }
+    });
+  </script>
+</body>
+</html>
