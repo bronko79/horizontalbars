@@ -1,4 +1,4 @@
-# horizontalbars
+# Horizontalbars for lightweight-charts
 Horizontal customSeries for lightweight-charts
 
 The renderer supports:
